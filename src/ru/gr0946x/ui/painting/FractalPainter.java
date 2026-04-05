@@ -6,11 +6,11 @@ import ru.gr0946x.ui.fractals.Fractal;
 
 import java.awt.*;
 
-public class FractalPainter implements Painter{
-
+public class FractalPainter implements Painter {
     private final Fractal fractal;
     private final Converter conv;
     private final ColorFunction colorFunction;
+
     @Override
     public int getWidth() {
         return conv.getWidth();
@@ -31,7 +31,7 @@ public class FractalPainter implements Painter{
         conv.setHeight(height);
     }
 
-    public FractalPainter(Fractal f, Converter conv, ColorFunction cf){
+    public FractalPainter(Fractal f, Converter conv, ColorFunction cf) {
         this.fractal = f;
         this.conv = conv;
         this.colorFunction = cf;
@@ -41,7 +41,7 @@ public class FractalPainter implements Painter{
     public void paint(Graphics g) {
         var w = getWidth();
         var h = getHeight();
-        for (int i = 0; i < w; i++) {
+        for (int i = 0; i < w; i++)
             for (int j = 0; j < h; j++) {
                 var x = conv.xScr2Crt(i);
                 var y = conv.yScr2Crt(j);
@@ -49,6 +49,5 @@ public class FractalPainter implements Painter{
                 g.setColor(colorFunction.getColor(res));
                 g.drawLine(i, j, i + 1, j);
             }
-        }
     }
 }
