@@ -16,7 +16,6 @@ public class MainWindow extends JFrame {
     private final Painter painter;
     private final Fractal mandelbrot;
     private final Converter conv;
-    private final Menu menu;
 
     public MainWindow() {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -45,8 +44,7 @@ public class MainWindow extends JFrame {
             mainPanel.repaint();
         });
 
-        menu = new Menu(mainPanel);
-        setJMenuBar(menu);
+        new Menu(this);
 
         setContent();
     }
