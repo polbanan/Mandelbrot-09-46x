@@ -59,7 +59,7 @@ public class FractalPainter implements Painter {
         CountDownLatch latch = new CountDownLatch(Thread_Count);
 
 
-        for (int t = 0; t < THREAD_COUNT; t++) {
+        for (int t = 0; t < Thread_Count; t++) {
             final int rowStart = t * stripHeight;
             final int rowEnd = Math.min(rowStart + stripHeight, h);
 
