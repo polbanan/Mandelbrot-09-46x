@@ -4,7 +4,7 @@ import ru.gr0946x.Converter;
 import ru.gr0946x.ui.fractals.ColorFunction;
 import ru.gr0946x.ui.fractals.Fractal;
 
-import javax.print.attribute.standard.RequestingUserName;
+
 import java.awt.image.BufferedImage;
 import java.util.concurrent.*;
 

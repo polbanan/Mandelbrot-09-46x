@@ -93,7 +93,7 @@ public class Menu {
         setColorScheme.add(colorSchemeB);
         setColorScheme.add(colorSchemeC);
 
-        fractalFuncA.addActionListener(e -> window.setCurrentFractal((x, y) -> {
+        fractalFuncA.addActionListener(_ -> window.setCurrentFractal((x, y) -> {
             // z² + c — классический Мандельброт
             var c = new Complex(x, y);
             var z = new Complex();
@@ -105,7 +105,7 @@ public class Menu {
             }
             return (float) i / maxIt;
         }));
-        fractalFuncB.addActionListener(e -> window.setCurrentFractal((x, y) -> {
+        fractalFuncB.addActionListener(_ -> window.setCurrentFractal((x, y) -> {
             // z⁴ + c
             var c = new Complex(x, y);
             var z = new Complex();
@@ -118,7 +118,7 @@ public class Menu {
             }
             return (float) i / maxIt;
         }));
-        fractalFuncC.addActionListener(e -> window.setCurrentFractal((x, y) -> {
+        fractalFuncC.addActionListener(_ -> window.setCurrentFractal((x, y) -> {
             // z³ + c
             var c = new Complex(x, y);
             var z = new Complex();
@@ -133,19 +133,19 @@ public class Menu {
             }
             return (float) i / maxIt;
         }));
-        colorSchemeA.addActionListener(e -> window.setCurrentColorFunction(value -> {
+        colorSchemeA.addActionListener(_ -> window.setCurrentColorFunction(value -> {
             if (value == 1.0f) return Color.BLACK;
             var r = (float) Math.abs(Math.sin(5 * value));
             var g = (float) Math.abs(Math.cos(8 * value) * Math.cos(3 * value));
             var b = (float) Math.abs((Math.sin(7 * value) + Math.cos(15 * value)) / 2f);
             return new Color(r, g, b);
         }));
-        colorSchemeB.addActionListener(e -> window.setCurrentColorFunction(value -> {
+        colorSchemeB.addActionListener(_ -> window.setCurrentColorFunction(value -> {
             if (value == 1.0f) return Color.BLACK;
             var intensity = (float) (1 - value);
             return new Color(intensity, intensity, intensity);
         }));
-        colorSchemeC.addActionListener(e -> window.setCurrentColorFunction(value -> {
+        colorSchemeC.addActionListener(_ -> window.setCurrentColorFunction(value -> {
             if (value == 1.0f) return Color.BLACK;
             var intensity = (float) (1 - value);
             var r = 0f;
