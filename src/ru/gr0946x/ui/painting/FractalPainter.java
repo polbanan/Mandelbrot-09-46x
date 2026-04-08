@@ -12,20 +12,26 @@ import java.awt.*;
 
 public class FractalPainter implements Painter {
 
-    private final Fractal fractal;
+    private  Fractal fractal;
     private final Converter conv;
 
     private static final int Thread_Count = Runtime.getRuntime().availableProcessors();
 
     private final ExecutorService executor = Executors.newFixedThreadPool(Thread_Count);
 
-    private final ColorFunction colorFunction;
+    private  ColorFunction colorFunction;
 
 
     public FractalPainter(Fractal f, Converter conv, ColorFunction cf) {
         this.fractal = f;
         this.conv = conv;
         this.colorFunction = cf;
+    }
+    public void setFractal(Fractal fractal) {
+        this.fractal = fractal;
+    }
+    public void setColorFunction(ColorFunction colorFunction) {
+        this.colorFunction = colorFunction;
     }
 
 
