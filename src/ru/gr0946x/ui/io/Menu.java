@@ -9,7 +9,7 @@ public class Menu {
     private final FractalFileManager fileManager;
     private final FractalSerializer fracSerializer;
 
-    public Menu (MainWindow mainWindow, FractalSerializer fracSerializer, FractalFileManager fileManager) {
+    public Menu(MainWindow mainWindow, FractalSerializer fracSerializer, FractalFileManager fileManager) {
         this.mainWindow = mainWindow;
         this.fracSerializer = fracSerializer;
         this.fileManager = fileManager;
@@ -32,11 +32,9 @@ public class Menu {
         JMenu fileMenu = new JMenu("Файл");
         fileMenu.setMnemonic('F');
 
-        JMenu fileSaveMenu = new JMenu("Сохранить как...");
-        JMenuItem saveAsPNGItem = new JMenuItem("Файл .png");
-        JMenuItem saveAsJPGItem = new JMenuItem("Файл .jpg");
-        JMenuItem saveAsFracItem = new JMenuItem("Файл .frac");
-        saveAsFracItem.addActionListener(e -> fileManager.save(fracSerializer));
+        JMenuItem saveAsItem = new JMenuItem("Сохранить как...");
+        saveAsItem.addActionListener(e -> mainWindow.saveFractal());
+        saveAsItem.setAccelerator(KeyStroke.getKeyStroke("control S"));
 
         JMenuItem openFileItem = new JMenuItem("Открыть...");
         openFileItem.addActionListener(e -> fileManager.open(fracSerializer, mainWindow::repaint));
@@ -45,10 +43,8 @@ public class Menu {
         JMenuItem createAnimationItem = new JMenuItem("Создать анимацию...");
         createAnimationItem.setAccelerator(KeyStroke.getKeyStroke("control N"));
 
-        fileMenu.add(fileSaveMenu);
-        fileSaveMenu.add(saveAsPNGItem);
-        fileSaveMenu.add(saveAsJPGItem);
-        fileSaveMenu.add(saveAsFracItem);
+        fileMenu.add(saveAsItem);
+        fileMenu.addSeparator();
         fileMenu.add(openFileItem);
         fileMenu.addSeparator();
         fileMenu.add(createAnimationItem);
@@ -63,11 +59,7 @@ public class Menu {
         JMenuItem undoItem = new JMenuItem("Отменить");
         undoItem.setAccelerator(KeyStroke.getKeyStroke("control Z"));
 
-//        JMenuItem redoItem = new JMenuItem("Повторить");
-//        redoItem.setAccelerator(KeyStroke.getKeyStroke("control Y"));
-
         editMenu.add(undoItem);
-//        editMenu.add(redoItem);
 
         return editMenu;
     }
@@ -95,8 +87,6 @@ public class Menu {
         adaptiveIterationsItem.setSelected(true);
         adaptiveIterationsItem.setAccelerator(KeyStroke.getKeyStroke("control I"));
 
-        viewMenu.add(setFractalFuncMenu);
-
         functionGroup.add(fractalFunc1Item);
         functionGroup.add(fractalFunc2Item);
         functionGroup.add(fractalFunc3Item);
@@ -104,8 +94,6 @@ public class Menu {
         setFractalFuncMenu.add(fractalFunc1Item);
         setFractalFuncMenu.add(fractalFunc2Item);
         setFractalFuncMenu.add(fractalFunc3Item);
-
-        viewMenu.add(setColorSchemeMenu);
 
         colorSchemeGroup.add(colorScheme1Item);
         colorSchemeGroup.add(colorScheme2Item);
@@ -115,8 +103,9 @@ public class Menu {
         setColorSchemeMenu.add(colorScheme2Item);
         setColorSchemeMenu.add(colorScheme3Item);
 
+        viewMenu.add(setFractalFuncMenu);
+        viewMenu.add(setColorSchemeMenu);
         viewMenu.addSeparator();
-
         viewMenu.add(adaptiveIterationsItem);
 
         return viewMenu;

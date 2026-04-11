@@ -19,7 +19,7 @@ public class MainWindow extends JFrame {
     private final Painter painter;
     private final Mandelbrot mandelbrot;
     private final Converter conv;
-    private final FractalSerializer fracSerializer;
+    private final FracSerializer fracSerializer;
     private final FractalFileManager fileManager;
     private boolean adaptiveIterationsEnabled = true;
 
@@ -83,7 +83,9 @@ public class MainWindow extends JFrame {
                 .addGap(8)
         );
     }
-
+    public void saveFractal() {
+        fracSerializer.saveWithFormatChoice(this, conv, mandelbrot, mainPanel);
+    }
     public void setAdaptiveIterationsEnabled(boolean enabled) {
         this.adaptiveIterationsEnabled = enabled;
     }
