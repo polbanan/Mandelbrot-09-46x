@@ -11,20 +11,24 @@ import javax.swing.*;
 import java.awt.*;
 
 public class Menu {
-    private final MainWindow window;
+    private final MainWindow mainWindow;
     private final FractalFileManager fileManager;
+
     private final FractalSerializer fracSerializer = new FracSerializer();
     private final FunctionAndColorShemsLists lists;
+    private final FractalSerializer fracSerializer;
 
-    public Menu(MainWindow window, Converter conv, Mandelbrot mandelbrot) {
-        this.window = window;
-        this.fileManager = new FractalFileManager(window, conv, mandelbrot);
-        this.lists=new FunctionAndColorShemsLists();
+    public Menu(MainWindow mainWindow, FractalSerializer fracSerializer, FractalFileManager fileManager, ImageSerializer imageSerializer,Converter conv, Mandelbrot mandelbrot) {
+        this.mainWindow = mainWindow;
+        this.fracSerializer = fracSerializer;
+        this.fileManager = fileManager;
+        this.lists = new FunctionAndColorShemsLists();
+
         createMenu();
     }
 
     public void createMenu() {
-        window.setJMenuBar(createMenuBar());
+        mainWindow.setJMenuBar(createMenuBar());
     }
 
     private JMenuBar createMenuBar() {
@@ -37,53 +41,94 @@ public class Menu {
 
     private JMenu createFileMenu() {
         JMenu fileMenu = new JMenu("Файл");
+        fileMenu.setMnemonic('F');
 
-        JMenu fileSave = new JMenu("Сохранить как...");
-        JMenuItem saveAsPNG = new JMenuItem("Файл .png");
-        JMenuItem saveAsJPG = new JMenuItem("Файл .jpg");
+        JMenuItem saveAsItem = new JMenuItem("Сохранить как...");
+        saveAsItem.addActionListener(e -> mainWindow.saveFractal());
+        saveAsItem.setAccelerator(KeyStroke.getKeyStroke("control S"));
 
-        JMenuItem saveAsFrac = new JMenuItem("Файл .frac");
-        saveAsFrac.addActionListener(e -> fileManager.save(fracSerializer));
+        JMenuItem openItem = new JMenuItem("Открыть...");
+        openItem.addActionListener(e -> mainWindow.openFile());
+        openItem.setAccelerator(KeyStroke.getKeyStroke("control O"));
 
-        JMenuItem openFile = new JMenuItem("Открыть...");
-        openFile.addActionListener(e -> fileManager.open(fracSerializer, window::repaint));
+        JMenuItem createAnimationItem = new JMenuItem("Создать анимацию...");
+        createAnimationItem.setAccelerator(KeyStroke.getKeyStroke("control N"));
 
-        JMenuItem createAnimation = new JMenuItem("Создать анимацию...");
-
-        fileMenu.add(fileSave);
-        fileSave.add(saveAsPNG);
-        fileSave.add(saveAsJPG);
-        fileSave.add(saveAsFrac);
-        fileMenu.add(openFile);
+        fileMenu.add(saveAsItem);
         fileMenu.addSeparator();
-        fileMenu.add(createAnimation);
+        fileMenu.add(openItem);
+        fileMenu.addSeparator();
+        fileMenu.add(createAnimationItem);
 
         return fileMenu;
     }
 
     private JMenu createEditMenu() {
         JMenu editMenu = new JMenu("Правка");
-        JMenuItem undo = new JMenuItem("Отменить");
-        undo.setAccelerator(KeyStroke.getKeyStroke("control Z"));
-        editMenu.add(undo);
+        editMenu.setMnemonic('E');
+
+        JMenuItem undoItem = new JMenuItem("Отменить");
+        undoItem.setAccelerator(KeyStroke.getKeyStroke("control Z"));
+
+        undoItem.setEnabled(mainWindow.canUndo());
+        undoItem.addActionListener(e -> mainWindow.triggerUndo());
+
+        editMenu.addMenuListener(new javax.swing.event.MenuListener() {
+            @Override
+            public void menuSelected(javax.swing.event.MenuEvent e) {
+                undoItem.setEnabled(mainWindow.canUndo());
+            }
+            @Override
+            public void menuDeselected(javax.swing.event.MenuEvent e) {}
+            @Override
+            public void menuCanceled(javax.swing.event.MenuEvent e) {}
+        });
+
+        editMenu.add(undoItem);
         return editMenu;
     }
 
     private JMenu createViewMenu() {
         JMenu viewMenu = new JMenu("Вид");
-        JMenuItem juliaSet = new JMenuItem("Показать множество Жюлиа");
+        viewMenu.setMnemonic('V');
 
-        JMenu setFractalFunc = new JMenu("Задать функцию построения фрактала");
-        JMenuItem fractalFuncA = new JMenuItem("Функция 1");
-        JMenuItem fractalFuncB = new JMenuItem("Функция 2");
-        JMenuItem fractalFuncC = new JMenuItem("Функция 3");
+        JMenu setFractalFuncMenu = new JMenu("Задать функцию построения фрактала");
+        ButtonGroup functionGroup = new ButtonGroup();
+        JRadioButtonMenuItem fractalFunc1Item = new JRadioButtonMenuItem("Функция 1");
+        fractalFunc1Item.setSelected(true);
+        JRadioButtonMenuItem fractalFunc2Item = new JRadioButtonMenuItem("Функция 2");
+        JRadioButtonMenuItem fractalFunc3Item = new JRadioButtonMenuItem("Функция 3");
 
-        JMenu setColorScheme = new JMenu("Задать цветовую схему");
-        JMenuItem colorSchemeA = new JMenuItem("Схема 1");
-        JMenuItem colorSchemeB = new JMenuItem("Схема 2");
-        JMenuItem colorSchemeC = new JMenuItem("Схема 3");
+        JMenu setColorSchemeMenu = new JMenu("Задать цветовую схему");
+        ButtonGroup colorSchemeGroup = new ButtonGroup();
+        JRadioButtonMenuItem colorScheme1Item = new JRadioButtonMenuItem("Схема 1");
+        colorScheme1Item.setSelected(true);
+        JRadioButtonMenuItem colorScheme2Item = new JRadioButtonMenuItem("Схема 2");
+        JRadioButtonMenuItem colorScheme3Item = new JRadioButtonMenuItem("Схема 3");
 
-        viewMenu.add(juliaSet);
+        JCheckBoxMenuItem adaptiveIterationsItem = new JCheckBoxMenuItem("Адаптивное число итераций");
+        adaptiveIterationsItem.addActionListener(e -> mainWindow.setAdaptiveIterationsEnabled(adaptiveIterationsItem.isSelected()));
+        adaptiveIterationsItem.setSelected(true);
+        adaptiveIterationsItem.setAccelerator(KeyStroke.getKeyStroke("control I"));
+
+        functionGroup.add(fractalFunc1Item);
+        functionGroup.add(fractalFunc2Item);
+        functionGroup.add(fractalFunc3Item);
+
+        setFractalFuncMenu.add(fractalFunc1Item);
+        setFractalFuncMenu.add(fractalFunc2Item);
+        setFractalFuncMenu.add(fractalFunc3Item);
+
+        colorSchemeGroup.add(colorScheme1Item);
+        colorSchemeGroup.add(colorScheme2Item);
+        colorSchemeGroup.add(colorScheme3Item);
+
+        setColorSchemeMenu.add(colorScheme1Item);
+        setColorSchemeMenu.add(colorScheme2Item);
+        setColorSchemeMenu.add(colorScheme3Item);
+
+        viewMenu.add(setFractalFuncMenu);
+        viewMenu.add(setColorSchemeMenu);
         viewMenu.addSeparator();
         viewMenu.add(setFractalFunc);
         viewMenu.add(setColorScheme);
@@ -97,24 +142,25 @@ public class Menu {
         setColorScheme.add(colorSchemeC);
         // Функции фракталов
         fractalFuncA.addActionListener(_ ->
-                window.setCurrentFractal(lists.getFractalFunctions().get(0)));
+                mainWindow.setCurrentFractal(lists.getFractalFunctions().get(0)));
 
         fractalFuncB.addActionListener(_ ->
-                window.setCurrentFractal(lists.getFractalFunctions().get(1)));
+                mainWindow.setCurrentFractal(lists.getFractalFunctions().get(1)));
 
         fractalFuncC.addActionListener(_ ->
-                window.setCurrentFractal(lists.getFractalFunctions().get(2)));
+                mainWindow.setCurrentFractal(lists.getFractalFunctions().get(2)));
 
         // Цветовые схемы
         colorSchemeA.addActionListener(_ ->
-                window.setCurrentColorFunction(lists.getColorSchemes().get(0)));
+                mainWindow.setCurrentColorFunction(lists.getColorSchemes().get(0)));
 
         colorSchemeB.addActionListener(_ ->
-                window.setCurrentColorFunction(lists.getColorSchemes().get(1)));
+                mainWindow.setCurrentColorFunction(lists.getColorSchemes().get(1)));
 
         colorSchemeC.addActionListener(_ ->
-                window.setCurrentColorFunction(lists.getColorSchemes().get(2)));
+                mainWindow.setCurrentColorFunction(lists.getColorSchemes().get(2)));
 
+        viewMenu.add(adaptiveIterationsItem);
 
         return viewMenu;
 

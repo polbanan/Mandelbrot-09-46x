@@ -1,12 +1,22 @@
 package ru.gr0946x.ui;
 
 import ru.gr0946x.Converter;
+
 import ru.gr0946x.ui.fractals.ColorFunction;
 import ru.gr0946x.ui.fractals.Fractal;
+import ru.gr0946x.ui.fractals.FractalState;
 import ru.gr0946x.ui.fractals.Mandelbrot;
+import ru.gr0946x.ui.functions.UndoManager;
+import ru.gr0946x.ui.io.FracSerializer;
+import ru.gr0946x.ui.io.FractalFileManager;
+import ru.gr0946x.ui.io.ImageSerializer;
 import ru.gr0946x.ui.io.Menu;
 import ru.gr0946x.ui.painting.FractalPainter;
 import ru.gr0946x.ui.painting.Painter;
+import javax.swing.KeyStroke;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import javax.swing.JComponent;
 
 import javax.swing.*;
 import java.awt.*;
@@ -18,12 +28,22 @@ public class MainWindow extends JFrame {
     private final Painter painter;
     private final Mandelbrot mandelbrot;
     private final Converter conv;
+    private final FracSerializer fracSerializer;
+    private final FractalFileManager fileManager;
+    private final ImageSerializer imageSerializer;
+    private boolean adaptiveIterationsEnabled = true;
+    private final UndoManager undoManager;
 
     public MainWindow() {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setMinimumSize(new Dimension(800, 650));
+
         mandelbrot = new Mandelbrot();
         conv = new Converter(-2.0, 1.0, -1.0, 1.0);
+        this.undoManager = new UndoManager(this::restoreState);
+        fracSerializer = new FracSerializer();
+        fileManager = new FractalFileManager(this, conv, mandelbrot);
+        imageSerializer = new ImageSerializer();
 
         painter = new FractalPainter(mandelbrot, conv, (value) -> {
             if (value == 1.0) return Color.BLACK;
@@ -32,28 +52,50 @@ public class MainWindow extends JFrame {
             var b = (float)abs((sin(7 * value) + cos(15 * value)) / 2f);
             return new Color(r, g, b);
         });
-
-        mainPanel = new SelectablePanel(painter);
+        mainPanel = new SelectablePanel(painter, conv, imageSerializer);
         mainPanel.setBackground(Color.WHITE);
 
         mainPanel.addSelectListener((r) -> {
+            if (imageSerializer.isImageMode()) {
+                JOptionPane.showMessageDialog(this,
+                        "Масштабирование недоступно при просмотре изображения.\nОткройте фрактал (.frac) для масштабирования.",
+                        "Предупреждение",
+                        JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
             if (r.width <= 2 || r.height <= 2) {
                 return;
             }
+            undoManager.push(new FractalState(
+                    conv.getXMin(), conv.getXMax(),
+                    conv.getYMin(), conv.getYMax(),
+                    mandelbrot.getMaxIterations()
+            ));
             var xMin = conv.xScr2Crt(r.x);
             var xMax = conv.xScr2Crt(r.x + r.width);
             var yMin = conv.yScr2Crt(r.y + r.height);
             var yMax = conv.yScr2Crt(r.y);
             conv.setXShape(xMin, xMax);
             conv.setYShape(yMin, yMax);
-            double zoomFactor = 3.0 / (xMax - xMin);
-            mandelbrot.setMaxIterations(Math.max(100, (int)(100 * (1 + Math.log10(zoomFactor)))));
+
+            if (adaptiveIterationsEnabled) {
+                double zoomFactor = 3.0 / (xMax - xMin);
+                mandelbrot.setMaxIterations(Math.max(100, (int)(100 * (1 + Math.log10(zoomFactor)))));
+            }
+
+            imageSerializer.clearImage();
             mainPanel.repaint();
         });
 
-        new Menu(this, conv, mandelbrot);
-
+        new Menu(this, fracSerializer, fileManager, imageSerializer);
+        getRootPane().registerKeyboardAction(
+                e -> undoManager.undo(),
+                KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_DOWN_MASK),
+                JComponent.WHEN_IN_FOCUSED_WINDOW
+        );
         setContent();
+
     }
     private void setContent(){
         var gl = new GroupLayout(getContentPane());
@@ -64,7 +106,6 @@ public class MainWindow extends JFrame {
                 .addComponent(mainPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE)
                 .addGap(8)
         );
-
         gl.setHorizontalGroup(gl.createSequentialGroup()
                 .addGap(8)
                 .addComponent(mainPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE)
@@ -84,4 +125,30 @@ public class MainWindow extends JFrame {
         mainPanel.repaint();
     }
 }
+    private void restoreState(FractalState state) {
+        conv.setXShape(state.xMin(), state.xMax());
+        conv.setYShape(state.yMin(), state.yMax());
+        mandelbrot.setMaxIterations(state.maxIterations());
+        mainPanel.repaint();
+    }
+    public void triggerUndo() {
+        if (undoManager.undo()) {
+            repaint();
+        }
+    }
+    public boolean canUndo() {
+        return undoManager.canUndo();
+    }
 
+    public void saveFractal() {
+        fracSerializer.saveWithFormatChoice(this, conv, mandelbrot, mainPanel, imageSerializer);
+    }
+
+    public void openFile() {
+        fracSerializer.openWithFormatChoice(this, conv, mandelbrot, mainPanel, imageSerializer);
+    }
+
+    public void setAdaptiveIterationsEnabled(boolean enabled) {
+        this.adaptiveIterationsEnabled = enabled;
+    }
+}
