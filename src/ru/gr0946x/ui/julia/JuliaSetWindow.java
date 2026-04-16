@@ -83,6 +83,14 @@ public class JuliaSetWindow extends JFrame {
             fractalPanel.repaint();
         });
 
+        fractalPanel.setStateChangeListener(() -> {
+            undoManager.push(new FractalState(
+                    converter.getXMin(), converter.getXMax(),
+                    converter.getYMin(), converter.getYMax(),
+                    fractal.getMaxIterations()
+            ));
+        });
+
         // Клик для смены константы
         fractalPanel.addMouseListener(new MouseAdapter() {
             @Override

@@ -77,6 +77,14 @@ public class MainWindow extends JFrame {
             mainPanel.repaint();
         });
 
+        mainPanel.setStateChangeListener(() -> {
+            undoManager.push(new FractalState(
+                    converter.getXMin(), converter.getXMax(),
+                    converter.getYMin(), converter.getYMax(),
+                    fractal.getMaxIterations()
+            ));
+        });
+
         new MenuManager(this, new MainMenuProvider(this));
 
         getRootPane().registerKeyboardAction(

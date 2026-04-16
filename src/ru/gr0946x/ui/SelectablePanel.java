@@ -1,5 +1,6 @@
 package ru.gr0946x.ui;
 
+import ru.gr0946x.ui.functions.StateChangeListener;
 import ru.gr0946x.ui.io.ImageSerializer;
 import ru.gr0946x.Converter;
 import ru.gr0946x.ui.painting.Painter;
@@ -16,7 +17,7 @@ public class SelectablePanel extends PaintPanel{
     private int lastDragX;
     private int lastDragY;
     private final Converter converter;
-
+    private StateChangeListener stateChangeListener;
     private final ArrayList<SelectListener> selectHandlers = new ArrayList<>();
 
     public SelectablePanel(Painter painter, Converter converter, ImageSerializer imageSerializer) {
@@ -31,6 +32,9 @@ public class SelectablePanel extends PaintPanel{
                     rect = new SelectedRect(e.getX(), e.getY());
                     paintSelectedRect();
                 } else if (SwingUtilities.isRightMouseButton(e)) {
+                    if (stateChangeListener != null) {
+                        stateChangeListener.onStateChange();
+                    }
                     isRightDragging = true;
                     lastDragX = e.getX();
                     lastDragY = e.getY();
@@ -106,6 +110,10 @@ public class SelectablePanel extends PaintPanel{
 
     public void removeSelectListener(SelectListener listener) {
         selectHandlers.remove(listener);
+    }
+
+    public void setStateChangeListener(StateChangeListener listener) {
+        this.stateChangeListener = listener;
     }
 
     private void paintSelectedRect() {
