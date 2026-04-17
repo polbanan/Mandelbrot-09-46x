@@ -67,6 +67,34 @@ public class MainWindow extends JFrame {
             var xMax = converter.xScr2Crt(r.x + r.width);
             var yMin = converter.yScr2Crt(r.y + r.height);
             var yMax = converter.yScr2Crt(r.y);
+
+
+            double cx = (xMin + xMax) / 2.0;
+            double cy = (yMin + yMax) / 2.0;
+            double xRange = xMax - xMin;
+            double yRange = yMax - yMin;
+
+            int panelW = mainPanel.getWidth();
+            int panelH = mainPanel.getHeight();
+
+            if (panelW > 0 && panelH > 0) {
+                double panelAspect = (double) panelW / panelH;
+                double selAspect = xRange / yRange;
+
+                if (selAspect > panelAspect) {
+
+                    double newYRange = xRange / panelAspect;
+                    yMin = cy - newYRange / 2.0;
+                    yMax = cy + newYRange / 2.0;
+                } else {
+
+                    double newXRange = yRange * panelAspect;
+                    xMin = cx - newXRange / 2.0;
+                    xMax = cx + newXRange / 2.0;
+                }
+            }
+
+
             converter.setXShape(xMin, xMax);
             converter.setYShape(yMin, yMax);
 
