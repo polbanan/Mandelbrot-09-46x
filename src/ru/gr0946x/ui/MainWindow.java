@@ -62,7 +62,6 @@ public class MainWindow extends JFrame {
                     converter.getYMin(), converter.getYMax(),
                     fractal.getMaxIterations()
             ));
-
             var xMin = converter.xScr2Crt(r.x);
             var xMax = converter.xScr2Crt(r.x + r.width);
             var yMin = converter.yScr2Crt(r.y + r.height);
